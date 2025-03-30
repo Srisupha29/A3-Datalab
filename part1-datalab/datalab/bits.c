@@ -1,7 +1,7 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * <Srisupha Chawla: Srisupha29>
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
@@ -175,7 +175,7 @@ NOTES:
  *  Rating: 2
  */
 int sign(int x) {
-    return 2;
+    return (x >> 31) | (!!x);
 }
 /* 
  * anyEvenBit - return 1 if any even-numbered bit in word set to 1
@@ -185,7 +185,8 @@ int sign(int x) {
  *   Rating: 2
  */
 int anyEvenBit(int x) {
-  return 2;
+    int mask = 0x55 | (0x55 << 8) | (0x55 << 16) | (0x55 << 24);
+    return !!(x & mask);
 }
 /* 
  * minusOne - return a value of -1 
@@ -194,7 +195,7 @@ int anyEvenBit(int x) {
  *   Rating: 1
  */
 int minusOne(void) {
-  return 2;
+    return ~0;
 }
 /* 
  * bitMask - Generate a mask consisting of all 1's 
@@ -207,7 +208,9 @@ int minusOne(void) {
  *   Rating: 3
  */
 int bitMask(int highbit, int lowbit) {
-  return 2;
+    int high = (1 << (highbit + 1)) - 1;
+    int low = (1 << lowbit) - 1;
+    return high ^ low;
 }
 /* 
  * getByte - Extract byte n from word x
@@ -218,7 +221,7 @@ int bitMask(int highbit, int lowbit) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return 2;
+    return (x >> (n << 3)) & 0xFF;
 }
 /* 
  * absVal - absolute value of x
@@ -229,7 +232,8 @@ int getByte(int x, int n) {
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+    int mask = x >> 31;  
+    return (x + mask) ^ mask; 
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -238,8 +242,10 @@ int absVal(int x) {
  *   Max ops: 40
  *   Rating: 4
  */
-int bitCount(int x) {
-  return 2;
+int bitMask(int highbit, int lowbit) {
+    int high = (1 << (highbit + 1)) - 1;
+    int low = (1 << lowbit) - 1;
+    return high ^ low;
 }
 /* 
  * byteSwap - swaps the nth byte and the mth byte
@@ -251,8 +257,21 @@ int bitCount(int x) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+    int n_shift = n << 3;  // Convert byte index to bit position
+    int m_shift = m << 3;
+    
+    int n_byte = (x >> n_shift) & 0xFF;  // Extract the nth byte
+    int m_byte = (x >> m_shift) & 0xFF;  // Extract the mth byte
+    
+    int mask = (0xFF << n_shift) | (0xFF << m_shift);  // Mask for clearing bytes
+    
+    x = x & ~mask;  // Clear the nth and mth bytes in x
+    
+    x = x | (n_byte << m_shift) | (m_byte << n_shift);  // Swap the bytes
+    
+    return x;
 }
+
 /* 
  * bang - Compute !x without using !
  *   Examples: bang(3) = 0, bang(0) = 1
@@ -261,7 +280,7 @@ int byteSwap(int x, int n, int m) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+    return ((x | (~x + 1)) >> 31) + 1;
 }
 /* 
  * tmin - return minimum two's complement integer 
@@ -270,7 +289,7 @@ int bang(int x) {
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+    return 1 << 31;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -280,7 +299,10 @@ int tmin(void) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+    int negX = ~x + 1;
+    int diffSign = ((x ^ y) >> 31) & 1;
+    int subNonNeg = ((y + negX) >> 31) & 1;
+    return diffSign & (x >> 31) | (!diffSign & !subNonNeg);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -291,7 +313,8 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+    int bias = (x >> 31) & ((1 << n) - 1); 
+    return (x + bias) >> n;
 }
 /* 
  * negate - return -x 
@@ -301,7 +324,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+    return ~x + 1;
 }
 /* 
  * greatestBitPos - return a mask that marks the position of the
@@ -312,7 +335,13 @@ int negate(int x) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    
+    return (x & (~x >> 1));
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -322,5 +351,5 @@ int greatestBitPos(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+    return !(x >> 31) & !!x;
 }
