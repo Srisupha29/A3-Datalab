@@ -208,9 +208,15 @@ int minusOne(void) {
  *   Rating: 3
  */
 int bitMask(int highbit, int lowbit) {
-    int high = (1 << (highbit + 1)) - 1;
-    int low = (1 << lowbit) - 1;
-    return high ^ low;
+    int high_mask;
+    int low_mask;
+
+    high_mask = (~0) << highbit;
+    high_mask = ~(high_mask << 1);
+    
+    low_mask = (~0) << lowbit;
+    
+    return high_mask & low_mask;
 }
 /* 
  * getByte - Extract byte n from word x
@@ -242,10 +248,32 @@ int absVal(int x) {
  *   Max ops: 40
  *   Rating: 4
  */
-int bitMask(int highbit, int lowbit) {
-    int high = (1 << (highbit + 1)) - 1;
-    int low = (1 << lowbit) - 1;
-    return high ^ low;
+int bitCount(int x) {
+    int m1;
+    int m2;
+    int m4;
+    int m8;
+    int m16;
+
+    m1 = 0x55 | (0x55 << 8);
+    m1 = m1 | (m1 << 16); 
+    
+    m2 = 0x33 | (0x33 << 8);
+    m2 = m2 | (m2 << 16); 
+    
+    m4 = 0x0F | (0x0F << 8);
+    m4 = m4 | (m4 << 16); 
+    
+    m8 = 0xFF | (0xFF << 16); 
+    m16 = 0xFF | (0xFF << 8); 
+
+    x = (x & m1) + ((x >> 1) & m1);
+    x = (x & m2) + ((x >> 2) & m2);
+    x = (x & m4) + ((x >> 4) & m4);
+    x = (x & m8) + ((x >> 8) & m8);
+    x = (x & m16) + ((x >> 16) & m16);
+    
+    return x;
 }
 /* 
  * byteSwap - swaps the nth byte and the mth byte
@@ -302,7 +330,7 @@ int isLessOrEqual(int x, int y) {
     int negX = ~x + 1;
     int diffSign = ((x ^ y) >> 31) & 1;
     int subNonNeg = ((y + negX) >> 31) & 1;
-    return diffSign & (x >> 31) | (!diffSign & !subNonNeg);
+    return (diffSign & (x >> 31)) | (!diffSign & !subNonNeg);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -313,7 +341,7 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    int bias = (x >> 31) & ((1 << n) - 1); 
+    int bias = (x >> 31) & ((1 << n) + ~0); 
     return (x + bias) >> n;
 }
 /* 
@@ -335,13 +363,15 @@ int negate(int x) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
+    int sign = x & (1 << 31);
+
     x |= x >> 1;
     x |= x >> 2;
     x |= x >> 4;
     x |= x >> 8;
     x |= x >> 16;
-    
-    return (x & (~x >> 1));
+
+    return sign | (x & ~(x >> 1));
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
